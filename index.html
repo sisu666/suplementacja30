@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Automatyczne pobieranie ICS</title>
+</head>
+<body>
+  <script>
+    function formatDateICS(date) {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    }
+
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0);
+    const end = new Date(start.getTime() + 30 * 60 * 1000);
+
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Custom Generator//PL
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+DTSTART:${formatDateICS(start)}
+DTEND:${formatDateICS(end)}
+RRULE:FREQ=DAILY;COUNT=30
+SUMMARY:Pamiętaj o suplementacji!
+DESCRIPTION:Pamiętaj o suplementacji!
+LOCATION:
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], { type: 'text/calendar' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'suplementacja.ics';
+
+    // Dodajemy do DOM, klikamy i usuwamy link
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  </script>
+</body>
+</html>
