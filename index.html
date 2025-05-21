@@ -2,9 +2,16 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <title>Automatyczne pobieranie ICS</title>
+  <title>Dodawanie do kalendarza...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+    #message { color: #555; }
+  </style>
 </head>
 <body>
+  <p id="message">Trwa dodawanie wydarzenia do kalendarza...</p>
+
   <script>
     function formatDateICS(date) {
       return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
@@ -28,19 +35,29 @@ LOCATION:
 END:VEVENT
 END:VCALENDAR`;
 
-    const blob = new Blob([icsContent], { type: 'text/calendar' });
+    const blob = new Blob([icsContent], { type: 'application/octet-stream' }); // <- MIME bardziej "wykonalny"
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement('a');
     link.href = url;
     link.download = 'suplementacja.ics';
 
-    // Dodajemy do DOM, klikamy i usuwamy link
+    // Dodaj do DOM i kliknij
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
 
-    URL.revokeObjectURL(url);
+    // Próba otwarcia po czasie (Android może zareagować)
+    setTimeout(() => {
+      window.location.href = url;
+    }, 1200); // Może pomóc na niektórych urządzeniach
+
+    // Czyszczenie
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      document.getElementById('message').innerText =
+        "Jeśli kalendarz się nie otworzył, otwórz pobrany plik 'suplementacja.ics' ręcznie.";
+    }, 3000);
   </script>
 </body>
 </html>
